@@ -1,0 +1,35 @@
+package vo;
+
+/* 강사님 코드 그대로 클론 코딩함
+ * github 업로드, 공부용 코드
+ */
+public class Store { // 도메인 일치
+	private int storeId;
+	private int managerStaffId;
+	private int addressId;
+	private String lastUpdate;
+	public int getStoreId() {
+		return storeId;
+	}
+	public void setStoreId(int storeId) {
+		this.storeId = storeId;
+	}
+	public int getManagerStaffId() {
+		return managerStaffId;
+	}
+	public void setManagerStaffId(int managerStaffId) {
+		this.managerStaffId = managerStaffId;
+	}
+	public int getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(int addressId) {
+		this.addressId = addressId;
+	}
+	public String getLastUpdate() {
+		return lastUpdate;
+	}
+	public void setLastUpdate(String lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+}
