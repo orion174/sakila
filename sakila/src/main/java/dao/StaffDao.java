@@ -4,7 +4,9 @@ import java.util.*;
 import java.sql.*;
 
 public class StaffDao {
-	/* StaffList 출력 코드
+	
+	/* 2022/04/01 StaffDao
+	 * 04/01 StaffList 출력 구현
 	 * 페이징 코드 처리x
 	*/
 	public List<Map<String,Object>> selectStaffList() {				

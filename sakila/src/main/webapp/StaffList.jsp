@@ -1,8 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import = "java.util.*" %>
 <%@ page import = "dao.*" %>
-<%
-	StaffDao staffDao =new StaffDao();
+<%	
+	// 2022/04/01 StaffList
+	
+	// StaffDao 생성
+	StaffDao staffDao = new StaffDao();
 	List<Map<String,Object>> list = staffDao.selectStaffList();
 %>
 <!DOCTYPE html>

@@ -1,6 +1,7 @@
 package vo;
 
 public class Staff { 
+	// 2022/04/01 Staff.vo
 	// picture 제외
 	private int staffId; // 기본키
 	private String staffName;
