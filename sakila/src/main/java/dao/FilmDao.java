@@ -4,10 +4,12 @@ import java.util.*;
 import java.sql.*;
 
 import util.DBUtil;
+import vo.FilmList;
 
 /* film 테이블 FilmDao
  * 프로시져 film_in_stock + film_not_in_stock 구현
  * film 테이블 검색기능 SELECT film price 구현 
+ * film 테이블 검색기능 SELECT film FilmListSearch 구현 
  */
 public class FilmDao {
 
@@ -125,7 +127,325 @@ public class FilmDao {
 		}
 		return list;
 	}
-
+	
+	/* 4) 검색기능구현
+	* (제목 + 배우) <-- 기본
+	* 1가지만 선택 : + price(대여료) / + length(시간) / + catergory(장르) / + rating(등급) -- 총 4가지
+	* 
+	* 2가지 선택 : + price(대여료) + length(시간) / + price(대여료) + catergory(장르) / + price(대여료) + rating(등급) /
+	* 			+ length(시간) + catergory(장르) / + length(시간) + rating(등급) / + catergory(장르) + rating(등급) -- 총 6가지
+	* 
+	* 3가지 선택 : + price(대여료) + length(시간) + catergory(장르) / + price(대여료) + length(시간) + rating(등급) /
+	* 			+ catergory(장르) + rating(등급) + price(대여료) / catergory(장르) + rating(등급) + length(시간) -- 총 4가지
+	* 
+	* 모두 선택 : + price(대여료) + length(시간) + catergory(장르) + rating(등급) -- 총 1가지
+	*/ 
+	public List<FilmList> selectFilmListSearch(int beginRow, int rowPerPage, String category, String rating, double price, int length, String title, String actor) {		
+		// List에 저장
+		List<FilmList> list = new ArrayList<FilmList>();
+		// DB 초기화
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		// DBUtill 호출
+		conn = DBUtil.getConnection();
+		try {
+			// SQL 쿼리 (영화제목, 배우이름 검색 기본 세팅)
+			String sql = "SELECT fid,title,description,category,price,length,rating,actors FROM film_list WHERE title LIKE ? AND actors LIKE ?";
+			
+			// (제목 + 배우) <-- 기본
+			if(category.equals("") && rating.equals("") && price==-1 && length==-1) {
+				sql += " ORDER BY fid LIMIT ?, ?";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+				stmt.setInt(3, beginRow);
+				stmt.setInt(4, rowPerPage);
+			} 
+			
+			 // 1가지만 선택 : + price(대여료) / + length(시간) / + catergory(장르) / + rating(등급) -- 총 4가지
+			
+			 // 1) + length(시간)
+			 else if(category.equals("") && rating.equals("") && price==-1 && length!=-1) { 
+				if(length == 0) {
+					sql += " AND length<60 ORDER BY fid LIMIT ?, ?";
+				} else if(length == 1) {
+					sql += " AND length>=60 ORDER BY fid LIMIT ?, ?";
+				}
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+				stmt.setInt(3, beginRow);
+				stmt.setInt(4, rowPerPage);
+			} 
+			
+			 // 2) + price(대여료) 
+			 else if(category.equals("") && rating.equals("") && price!=-1 && length==-1) {
+				sql += " AND price=? ORDER BY fid LIMIT ?, ?";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+				stmt.setDouble(3, price);
+				stmt.setInt(4, beginRow);
+				stmt.setInt(5, rowPerPage);
+			} 
+			
+			 // 3) + catergory(장르)
+			 else if(!category.equals("") && rating.equals("") && price==-1 && length==-1) { 
+					sql += " AND category=? ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setInt(4, beginRow);
+					stmt.setInt(5, rowPerPage);
+			} 
+			
+			 // 4) + rating(등급)
+			 else if(category.equals("") && !rating.equals("") && price==-1 && length==-1) { 
+					sql += " AND rating=? ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, rating);
+					stmt.setInt(4, beginRow);
+					stmt.setInt(5, rowPerPage);
+			}
+			
+			/*2가지 선택 : + price(대여료) + length(시간) / + price(대여료) + catergory(장르) / + price(대여료) + rating(등급) /
+			 *		  + length(시간) + catergory(장르) / + length(시간) + rating(등급) / + catergory(장르) + rating(등급) -- 총 6가지
+			*/
+			
+			// 1) + price(대여료) + length(시간)
+			 else if(category.equals("") && rating.equals("") && price!=-1 && length!=-1) {
+					if(length == 0) {
+						sql += " AND price=? AND length<60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setDouble(3, price);
+						stmt.setInt(4, beginRow);
+						stmt.setInt(5, rowPerPage);
+					} else if(length == 1) {
+						sql += " AND price=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setDouble(3, price);
+						stmt.setInt(4, beginRow);
+						stmt.setInt(5, rowPerPage);
+					}
+			}
+			
+			 // 2) + price(대여료) + catergory(장르)
+			 else if(!category.equals("") && rating.equals("") && price!=-1 && length==-1) { 
+					sql += " AND category=? AND price=? ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setDouble(4, price);
+					stmt.setInt(5, beginRow);
+					stmt.setInt(6, rowPerPage);
+			}
+	
+			// 3) + price(대여료) + rating(등급)
+			else if(category.equals("") && !rating.equals("") && price!=-1 && length==-1) { 
+					    sql += " AND rating=? AND price=? ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, rating);
+						stmt.setDouble(4, price);
+						stmt.setInt(5, beginRow);
+						stmt.setInt(6, rowPerPage);
+			}
+					
+			// 4) + length(시간) + catergory(장르)
+			 else if(!category.equals("") && rating.equals("") && price==-1 && length!=-1) { 
+					if(length == 0) {
+						sql += " AND category=? AND length<60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setInt(4, beginRow);
+						stmt.setInt(5, rowPerPage);
+					} else if(length == 1) {
+						sql += " AND category=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setInt(4, beginRow);
+						stmt.setInt(5, rowPerPage);
+					}	
+			} 
+			
+			// 5) + length(시간) + rating(등급)
+			 else if(category.equals("") && !rating.equals("") && price==-1 && length!=-1) {
+					if(length == 0) {
+						sql += " AND rating=? AND length<60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, rating);
+						stmt.setInt(4, beginRow);
+						stmt.setInt(5, rowPerPage);
+					} else if(length == 1) {
+						sql += " AND rating=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, rating);
+						stmt.setInt(4, beginRow);
+						stmt.setInt(5, rowPerPage);
+					}
+			 }
+					
+			// 6) + catergory(장르) + rating(등급)
+			else if(!category.equals("") && !rating.equals("") && price==-1 && length==-1) {
+					sql += " AND category=? AND rating=? ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setString(4, rating);
+					stmt.setInt(5, beginRow);
+					stmt.setInt(6, rowPerPage);
+			} 
+			
+			/* 3가지 선택 : + price(대여료) + length(시간) + catergory(장르) / + price(대여료) + length(시간) + rating(등급) /
+			 * 			+ catergory(장르) + rating(등급) + price(대여료) / catergory(장르) + rating(등급) + length(시간) -- 총 4가지
+			 */
+			
+			// 1) + price(대여료) + length(시간) + catergory(장르)
+			else if(!category.equals("") && rating.equals("") && price!=-1 && length!=-1) { 
+				if(length == 0) {
+					sql += " AND category=? AND price=? AND length<60 ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setDouble(4, price);
+					stmt.setInt(5, beginRow);
+					stmt.setInt(6, rowPerPage);
+				} else if(length == 1) {
+					sql += " AND category=? AND price=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setDouble(4, price);
+					stmt.setInt(5, beginRow);
+					stmt.setInt(6, rowPerPage);
+				}
+			}
+			
+			// 2)  + price(대여료) + length(시간) + rating(등급)
+			else if(category.equals("") && !rating.equals("") && price!=-1 && length!=-1) { 
+				if(length == 0) {
+					sql += " AND rating=? AND price=? AND length<60 ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, rating);
+					stmt.setDouble(4, price);
+					stmt.setInt(5, beginRow);
+					stmt.setInt(6, rowPerPage);
+				} else if(length == 1) {
+					sql += " AND rating=? AND price=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, rating);
+					stmt.setDouble(4, price);
+					stmt.setInt(5, beginRow);
+					stmt.setInt(6, rowPerPage);
+				}
+			}
+			// 3) + catergory(장르) + rating(등급) + price(대여료)
+			else if(!category.equals("") && !rating.equals("") && price!=-1 && length==-1) { 
+				sql += " AND category=? AND rating=? AND price=? ORDER BY fid LIMIT ?, ?";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+				stmt.setString(3, category);
+				stmt.setString(4, rating);
+				stmt.setDouble(5, price);
+				stmt.setInt(6, beginRow);
+				stmt.setInt(7, rowPerPage);
+			}
+			
+			// 4) catergory(장르) + rating(등급) + length(시간)
+			 else if(!category.equals("") && !rating.equals("") && price==-1 && length!=-1) { // price 선택 X
+					if(length == 0) {
+						sql += " AND category=? AND rating=? AND length<60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+						stmt.setInt(5, beginRow);
+						stmt.setInt(6, rowPerPage);
+					} else if(length == 1) {
+						sql += " AND category=? AND rating=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+						stmt.setInt(5, beginRow);
+						stmt.setInt(6, rowPerPage);
+					}
+				} 
+			
+			// 모두 선택 : + price(대여료) + length(시간) + catergory(장르) + rating(등급) -- 총 1가지
+			 else {
+					if(length == 0) {
+						sql += " AND category=? AND rating=? AND price=? AND length<60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+						stmt.setDouble(5, price);
+						stmt.setInt(6, beginRow);
+						stmt.setInt(7, rowPerPage);
+					} else if(length == 1) {
+						sql += " AND category=? AND rating=? AND price=? AND length>=60 ORDER BY fid LIMIT ?, ?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+						stmt.setDouble(5, price);
+						stmt.setInt(6, beginRow);
+						stmt.setInt(7, rowPerPage);
+					}
+				}
+			
+			rs = stmt.executeQuery();
+			
+			// 데이터변환
+			while(rs.next()) {
+				FilmList f = new FilmList();
+				f.setFid(rs.getInt("fid"));
+				f.setTitle(rs.getString("title"));
+				f.setDesciption(rs.getString("description"));
+				f.setCategory(rs.getString("category"));
+				f.setPrice(rs.getDouble("price"));
+				f.setLength(rs.getInt("length"));
+				f.setRating(rs.getString("rating"));
+				f.setActors(rs.getString("actors"));
+				list.add(f);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
 	// 메서드 단위 테스트
 	public static void main(String[] args) {
 		// FilmDao
