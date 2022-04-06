@@ -1,58 +1,123 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.sql.*;
 
 import util.DBUtil;
-import vo.Film;
 
+/* film 테이블 FilmDao
+ * 프로시져 film_in_stock + film_not_in_stock 구현
+ * film 테이블 검색기능 SELECT film price 구현 
+ */
 public class FilmDao {
+
+	// 1) 프로시져 film_in_stock
+	public Map<String,Object> filmInStock(int filmId, int storeId) {
+		// HasgMap
+		Map<String,Object> map = new HashMap<String, Object>();
+		
+		// DB 초기화
+		Connection conn = null;
+		// PreparedStatement -> 쿼리를 실행
+		// CallableStatement -> 프로시저를 실행
+		CallableStatement stmt = null; 
+		ResultSet rs = null; 
+		
+		// select inventory_id...
+		List<Integer> list = new ArrayList<>();
+		// select count(inventory_id)..	
+		Integer count = 0;  
+		
+		// DBUtil 호출
+		conn = DBUtil.getConnection();
+		
+		try {
+			stmt = conn.prepareCall("{CALL film_in_stock(?,?,?)}");
+			stmt.setInt(1,filmId);
+			stmt.setInt(2,storeId);
+			stmt.registerOutParameter(3,Types.INTEGER);
+			rs= stmt.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getInt(1)); // rs.getInt("inventory_id")
+			}
+			count = stmt.getInt(3); // 프로시저 3번째 out변수 값
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		map.put("list", list);
+		map.put("count", count);
+
+		return map;
+	}
+
+	// 2) 프로시져 film_not_in_stock
+	public Map<String,Object> filmNotInStock(int filmId, int storeId) {
+		// Hash Map
+		Map<String, Object> map = new HashMap<String,Object>();
+		
+		// DB 초기화
+		Connection conn = null;
+		// PreparedStatement -> 쿼리를 실행
+		// CallableStatement -> 프로시저를 실행
+		CallableStatement stmt = null;
+		ResultSet rs = null;
+		
+		// select inventory_id...
+		List<Integer> list = new ArrayList<>(); 
+		// select count(inventory_id)..
+		Integer count = 0; 
+		
+		// DBUtil 호출
+		conn=DBUtil.getConnection();
+		
+		try {
+			stmt = conn.prepareCall("{call film_not_in_stock(?,?,?)}");
+			stmt.setInt(1,filmId);
+			stmt.setInt(2,storeId);
+			stmt.registerOutParameter(3, Types.INTEGER);
+			rs= stmt.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getInt(1)); // rs.getInt("inventory_id")
+			}
+			count = stmt.getInt(3); // 프로시저 3번째 out변수 값
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		map.put("list", list);
+		map.put("count", count);
+
+		return map;
+	}
 	
-	public List<Film> selectFilmListByPage(int beginRow, int rowPerPage) {
-		List<Film> list = new ArrayList<Film>();
+	// 3) 검색기능구현 
+	public List<Double> selectfilmPriceList() {
+		// ArrayList
+		List<Double> list = new ArrayList<Double>();
 		
 		// DB 초기화
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		// static으로 선언해서 ~
-		// MariaDB 드라이버 로딩 메서드 호출
+		// DBUtil 호출
 		conn = DBUtil.getConnection();
+		// SQL 쿼리 문자열 저장
 		String sql = 
-			"SELECT FID filmId, title title, description description, category name, price rentalRate, length length, rating rating, actors actor FROM film_list ORDER BY FID limit ?,?";
-	
+			"SELECT DISTINCT price FROM film_list ORDER BY price";
+		
 		try {
-			// SQL 쿼리 저장, 페이증 처리
 			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, beginRow);
-			stmt.setInt(2, rowPerPage);
 			rs = stmt.executeQuery();
-			// 데이터 변환
 			while(rs.next()) {
-				Film f = new Film(); // 다형성 
-				f.setFilmId(rs.getInt("filmId"));
-				f.setTitle(rs.getString("title"));
-				f.setDescription(rs.getString("description"));
-				f.setName(rs.getString("name"));
-				f.setRentalRate(rs.getInt("rentalRate"));
-				f.setLength(rs.getInt("length"));
-				f.setRating(rs.getString("rating"));
-				f.setActor(rs.getString("actor"));
-				list.add(f);
+				list.add(rs.getDouble("price"));
 			}
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				// DB자원반환
 				rs.close();
-				stmt.close(); 
+				stmt.close();
 				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -60,37 +125,25 @@ public class FilmDao {
 		}
 		return list;
 	}
-	
-	public int selectFilmTotalRow() throws Exception {
-		int row = 0; // 함수 결과값(쩡수) 반환해줄 변수 선언 후 초기화
+
+	// 메서드 단위 테스트
+	public static void main(String[] args) {
+		// FilmDao
+		FilmDao filmDao = new FilmDao();
+		// test 변수 값
+		int filmId = 7;
+		int storeId = 2;
 		
-		// DB 초기화
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+		// filmInStock 
+		Map<String,Object> map = filmDao.filmInStock(filmId, storeId);
+		List<Integer> list = (List<Integer>) map.get("list");
+		int count = (int) map.get("count");
 		
-		// static으로 선언해서 ~
-		conn = DBUtil.getConnection();
-		String sql = "SELECT COUNT(*) cnt FROM film_list";
+		// 단위 테스트 결과
+		System.out.println(filmId + "번 영화는 " + storeId +"번 가게에 "+ count + "개 남음.");
 		
-		try {
-			stmt = conn.prepareStatement(sql);
-			rs = stmt.executeQuery();
-			if(rs.next()) {
-				row = rs.getInt("cnt");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally {
-			try {
-				//DB자원반납
-				rs.close();
-				stmt.close();
-				conn.close();
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
+		for(int id : list) {
+			System.out.println(id); // inventory_id
 		}
-		return row;
 	}
 }
