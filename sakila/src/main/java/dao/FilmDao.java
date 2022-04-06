@@ -10,6 +10,7 @@ import vo.FilmList;
  * 프로시져 film_in_stock + film_not_in_stock 구현
  * film 테이블 검색기능 SELECT film price 구현 
  * film 테이블 검색기능 SELECT film FilmListSearch 구현 
+ * film 테이블 검색기능 페이징 추가
  */
 public class FilmDao {
 
@@ -446,6 +447,270 @@ public class FilmDao {
 		return list;
 	}
 	
+	// Film Search 페이징 코드 
+	// List페이지의 totalCount 
+	public int selectFilmSearchTotalRow (String category, String rating, double price, int length, String title, String actor) {
+		int row = 0; // 결과값(정수) 반환해줄 변수 선언 후 초기화
+		
+		// DB 초기화
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		// DBUtil 호출
+		conn = DBUtil.getConnection();
+		
+		// 
+		try {
+			// SQL 쿼리 (영화제목, 배우이름 검색 기본 세팅)
+			String sql = 
+			 "SELECT count(*) cnt FROM film_list where title LIKE ? AND actors LIKE ?";
+			
+			// (제목 + 배우) totalCount
+			if(category.equals("") && rating.equals("") && price==-1 && length==-1) {
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+			} 
+			
+			 // 1가지만 선택 : + price(대여료) / + length(시간) / + catergory(장르) / + rating(등급) -- 총 4가지
+			
+			 // 1) + length(시간) totalCount
+			 else if(category.equals("") && rating.equals("") && price==-1 && length!=-1) { 
+				if(length == 0) {
+					sql += " AND length<60";
+				} else if(length == 1) {
+					sql += " AND length>=60";
+				}
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+			} 
+			
+			 // 2) + price(대여료) totalCount
+			 else if(category.equals("") && rating.equals("") && price!=-1 && length==-1) {
+				sql += " AND price=?";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+				stmt.setDouble(3, price);
+			} 
+			 
+			 // 3) + catergory(장르) totalCount
+			 else if(!category.equals("") && rating.equals("") && price==-1 && length==-1) { 
+					sql += " AND category=?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+			} 
+			
+			 // 4) + rating(등급) totalCount
+			 else if(category.equals("") && !rating.equals("") && price==-1 && length==-1) { 
+					sql += " AND rating=?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, rating);
+			}
+			
+			/*2가지 선택 : + price(대여료) + length(시간) / + price(대여료) + catergory(장르) / + price(대여료) + rating(등급) /
+			 *		  + length(시간) + catergory(장르) / + length(시간) + rating(등급) / + catergory(장르) + rating(등급) -- 총 6가지
+			*/
+			
+			// 1) + price(대여료) + length(시간) totalCount
+			 else if(category.equals("") && rating.equals("") && price!=-1 && length!=-1) {
+					if(length == 0) {
+						sql += " AND price=? AND length<60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setDouble(3, price);
+					} else if(length == 1) {
+						sql += " AND price=? AND length>=60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setDouble(3, price);
+					}
+			}
+			
+			 // 2) + price(대여료) + catergory(장르) totalCount
+			 else if(!category.equals("") && rating.equals("") && price!=-1 && length==-1) { 
+					sql += " AND category=? AND price=?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setDouble(4, price);
+			}
+	
+			// 3) + price(대여료) + rating(등급) totalCount
+			else if(category.equals("") && !rating.equals("") && price!=-1 && length==-1) { 
+					    sql += " AND rating=? AND price=?";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, rating);
+						stmt.setDouble(4, price);
+			}
+					
+			// 4) + length(시간) + catergory(장르) totalCount
+			 else if(!category.equals("") && rating.equals("") && price==-1 && length!=-1) { 
+					if(length == 0) {
+						sql += " AND category=? AND length<60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+					} else if(length == 1) {
+						sql += " AND category=? AND length>=60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+					}	
+			} 
+			
+			// 5) + length(시간) + rating(등급) totalCount
+			 else if(category.equals("") && !rating.equals("") && price==-1 && length!=-1) {
+					if(length == 0) {
+						sql += " AND rating=? AND length<60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, rating);
+					} else if(length == 1) {
+						sql += " AND rating=? AND length>=60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, rating);
+					}
+			 }
+					
+			// 6) + catergory(장르) + rating(등급) totalCount
+			else if(!category.equals("") && !rating.equals("") && price==-1 && length==-1) {
+					sql += " AND category=? AND rating=?";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setString(4, rating);
+			} 
+			
+			/* 3가지 선택 : + price(대여료) + length(시간) + catergory(장르) / + price(대여료) + length(시간) + rating(등급) /
+			 * 			+ catergory(장르) + rating(등급) + price(대여료) / catergory(장르) + rating(등급) + length(시간) -- 총 4가지
+			 */
+			
+			// 1) + price(대여료) + length(시간) + catergory(장르) totalCount
+			else if(!category.equals("") && rating.equals("") && price!=-1 && length!=-1) { 
+				if(length == 0) {
+					sql += " AND category=? AND price=? AND length<60";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setDouble(4, price);
+				} else if(length == 1) {
+					sql += " AND category=? AND price=? AND length>=60";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, category);
+					stmt.setDouble(4, price);
+				}
+			}
+			
+			// 2)  + price(대여료) + length(시간) + rating(등급) totalCount
+			else if(category.equals("") && !rating.equals("") && price!=-1 && length!=-1) { 
+				if(length == 0) {
+					sql += " AND rating=? AND price=? AND length<60";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, rating);
+					stmt.setDouble(4, price);
+				} else if(length == 1) {
+					sql += " AND rating=? AND price=? AND length>=60";
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, "%"+title+"%");
+					stmt.setString(2, "%"+actor+"%");
+					stmt.setString(3, rating);
+					stmt.setDouble(4, price);
+				}
+			}
+			// 3) + catergory(장르) + rating(등급) + price(대여료) totalCount
+			else if(!category.equals("") && !rating.equals("") && price!=-1 && length==-1) { 
+				sql += " AND category=? AND rating=? AND price=?";
+				stmt = conn.prepareStatement(sql);
+				stmt.setString(1, "%"+title+"%");
+				stmt.setString(2, "%"+actor+"%");
+				stmt.setString(3, category);
+				stmt.setString(4, rating);
+				stmt.setDouble(5, price);
+			}
+			
+			// 4) catergory(장르) + rating(등급) + length(시간) totalCount
+			 else if(!category.equals("") && !rating.equals("") && price==-1 && length!=-1) { 
+					if(length == 0) {
+						sql += " AND category=? AND rating=? AND length<60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+					} else if(length == 1) {
+						sql += " AND category=? AND rating=? AND length>=60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+					}
+				} 
+			
+			// 모두 선택 : + price(대여료) + length(시간) + catergory(장르) + rating(등급)  totalCount
+			 else {
+					if(length == 0) {
+						sql += " AND category=? AND rating=? AND price=? AND length<60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+						stmt.setDouble(5, price);
+					} else if(length == 1) {
+						sql += " AND category=? AND rating=? AND price=? AND length>=60";
+						stmt = conn.prepareStatement(sql);
+						stmt.setString(1, "%"+title+"%");
+						stmt.setString(2, "%"+actor+"%");
+						stmt.setString(3, category);
+						stmt.setString(4, rating);
+						stmt.setDouble(5, price);
+					}
+		}
+			
+			rs = stmt.executeQuery();
+		
+			if(rs.next()) {
+				 row = rs.getInt("cnt");
+				} 
+			} catch (SQLException e) {
+					e.printStackTrace();
+			} finally {
+				try {
+					rs.close();
+					stmt.close();
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return row; // 반환값
+	}
+
 	// 메서드 단위 테스트
 	public static void main(String[] args) {
 		// FilmDao
