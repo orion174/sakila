@@ -3,18 +3,58 @@ package dao;
 import java.util.*;
 import java.sql.*;
 
-/* 강사님 코드 그대로 클론 코딩함
- * github 업로드, 공부용 코드
- */
+import util.DBUtil;
+
+/*  Rental Table Search를 위한
+ *  SELECT store_id 추가 
+*/
 public class StoreDao {
+	
+	public List<Integer> selectStoreIdList() {
+		// Array List 사용
+		List<Integer> list = new ArrayList<Integer>();
+		// DB 초기화
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		// DBUtil 호출
+		conn = DBUtil.getConnection();
+		try {
+			// SQL 쿼리 문자열 저장
+			String sql = 
+				"SELECT store_id storeId FROM store";
+			stmt = conn.prepareStatement(sql);
+			rs = stmt.executeQuery();
+
+			while(rs.next()) {
+				list.add(rs.getInt("storeId"));
+			}
+		  // ClassNotFoundException, SQLException두개의 예외를 부모타입 Exception으로 처리 -> 다형성
+		} catch (Exception e) { 
+				e.printStackTrace();
+				System.out.println("예외발생");
+			} finally {
+				try {
+					rs.close();
+					stmt.close();
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return list;
+		}
+				
+	
 	public List<Map<String, Object>> selectStoreList() {
 		List<Map<String, Object>> list = new ArrayList<>(); // 다형성
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			Class.forName("org.mariadb.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/sakila","root","java1234");
+			// Class.forName("org.mariadb.jdbc.Driver");
+			// conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/sakila","root","java1234");
+			conn = DBUtil.getConnection(); // DBUtil 메서드 사용 -> 코드 유지보수 쉬워짐
 			/*
 				SELECT 
 					s1.store_id storeId,
