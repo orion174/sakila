@@ -1,164 +1,245 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.*"%>
 <%@ page import="dao.*" %>
-<%	
-	// StatsDataDao 호출
+<%@ page import ="java.util.*" %>
+<%
+	// 요청값 받기 + NULL 값 체크 + 디버깅
+	int key = 0;
+	if(request.getParameter("key") != null && !request.getParameter("key").equals("")) {
+		key = Integer.parseInt(request.getParameter("key"));
+		System.out.println(key + "<--key");
+	}
+	
+	// dao 값 요청
 	StatsDataDao statsDataDao = new StatsDataDao();
-	// 1. AMOUNT BY CUSTOMER (MORE THAN 180 DOLLAR) 데이터 저장
-	List<Map<String, Object>> list_1 = statsDataDao.amountByCoustomer();
-	// 2. FILM COUNT BY RENTALRATE 데이터 저장
-	List<Map<String, Object>> list_2 = statsDataDao.countByRentalRate();
-	// 3. FILM COUNT BY RATING 데이터 저장
-	List<Map<String, Object>> list_3 = statsDataDao.countByRating();
-	// 4. FILM COUNT BY LANGUAGE 데이터 저장
-	List<Map<String, Object>> list_4 = statsDataDao.countByLanguage();
-	// 5. FILM COUNT BY LENHTH 데이터 저장
-	List<Map<String, Object>> list_5 = statsDataDao.countByRunningTime();	
-	// 6. FILM SALES DAY OF WEEK 데이터 저장
-	List<Map<String, Object>> list_6 = statsDataDao.salesDayOfWeek();
-	/*
-	// 7. Film Sales Ranking Of City
-	List<Map<String, Object>> list_7 = statsDataDao.salesRankingOfCity();	
-	*/  
+	// 1) customer 별 총 amount 180$ 이상
+	List<Map<String,Object>> amountByCoustomer = statsDataDao.amountByCoustomer();
+	// 2) 영화 제일 많이 빌려간 customer 5명
+	List<Map<String,Object>> countByCoustomer = statsDataDao.countByCoustomer();
+	// 3) rental_rate별 영화 갯수
+	List<Map<String,Object>> filmCountByRentalRate =statsDataDao.filmCountByRentalRate();
+	// 4) rating별 영화 갯수
+	List<Map<String,Object>> filmCountByRating = statsDataDao.filmCountByRating();
+	// 5) language 별 영화 갯수
+	List<Map<String,Object>> filmCountByLanguage = statsDataDao.filmCountByLanguage();
+	// 6) length 별 영화 갯수
+	List<Map<String,Object>> filmCountByLength = statsDataDao.filmCountByLength();
+	// 7) actor 별 영화 가장 많이 출현한 배우 5명
+	List<Map<String,Object>> actorByFilmCount = statsDataDao.actorByFilmCount();
+	// 8) 영화별 빌려간 횟수와 총 매출
+	List<Map<String,Object>> filmByRentalAmount =statsDataDao.filmByRentalAmount();
+	// 9) store 각 매장마다 요일별 매출(월, 화, 수, 목, 금, 토, 일)
+	List<Map<String,Object>> amountByDayOfWeek =statsDataDao.amountByDayOfWeek();
 %>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+	<title>statsData</title>
 </head>
-<body>
-	<h1>1. AMOUNT BY CUSTOMER (MORE THAN 180 DOLLAR)</h1>
-	<table border="1">
-		<thread>
-			<tr>
-				<th>customer_id</th>
+<body class="container">
+	<h1>통계자료 요구사항</h1>
+	<div class="list-group">
+	<!--customer 별 총 amount 180$이상  -->
+		<h2>1. customer 별 총 amount 180$이상</h2>
+		<table class="table table-bordered">
+			<thead>
+				<th>customerId</th>
 				<th>name</th>
 				<th>total</th>
+			</thead>
+			<tbody>
+		<%
+			for(Map m : amountByCoustomer){
+				
+		%>
+			<tr>
+				<td><%=m.get("customerId") %></td>
+				<td><%=m.get("name") %></td>
+				<td><%=m.get("total") %></td>
 			</tr>
-		</thread>
+		<%
+			}
+		%>
+		</tbody>
+	</table>
 
-		<%
-			for(Map m : list_1) {
-		%>
-			<tr>
-				<td><%=m.get("customerId")%></td>
-				<td><%=m.get("name")%></td>
-				<td><%=m.get("total")%></td>
-			</tr>
-		<%
-			}
-		%>
-	</table>
-	
-	<h1>2. FILM COUNT BY RENTALRATE</h1>
-	<table border="1">
-		<thread>
-			<tr>
-				<th>rental_rate</th>
-				<th>COUNT</th>
-			</tr>
-		</thread>
+	<!--customer 별 가장 많이 영화 빌린 5명  -->
+		<h2>2. customer 별 가장 많이 영화 빌린 5명</h2>
+		<table class="table table-bordered">
+			<thead>
+				<th>customerId</th>
+				<th>name</th>
+				<th>total</th>
+			</thead>
+			<tbody>
+			<%
+				for(Map m : countByCoustomer){
+					
+			%>
+				<tr>
+					<td><%=m.get("customerId") %></td>
+					<td><%=m.get("name") %></td>
+					<td><%=m.get("total") %></td>
+				</tr>
+			<%
+				}
+			%>
+			</tbody>
+		</table>
 
+	<!--rental_rate별 영화 갯수  -->
+		<h2>3. rental_rate별 영화 갯수</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>rentalRate</th>
+					<th>total</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : filmCountByRentalRate){
+						
+				%>
+					<tr>
+						<td><%=m.get("rentalRate") %></td>
+						<td><%=m.get("total") %></td>
+					</tr>
+				<%
+					}
+				%>
+		</tbody>
+	</table>
+	<!--rating별 영화 갯수 -->
+	<h2>4. rating별 영화 갯수</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>rating</th>
+					<th>total</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : amountByCoustomer){
+						
+				%>
+					<tr>
+						<td><%=m.get("rating") %></td>
+						<td><%=m.get("total") %></td>
+					</tr>
+				<%
+					}
+				%>
+				</tbody>
+			</table>
+	<!-- language 별 영화 갯수 -->
+		<h2>5. language 별 영화 갯수</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>name</th>
+					<th>total</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : filmCountByLanguage){
+						
+				%>
+					<tr>
+						<td><%=m.get("name") %></td>
+						<td><%=m.get("total") %></td>
+					</tr>
+				<%
+					}
+				%>
+				</tbody>
+			</table>
+	<!--length 별 영화 갯수  -->
+		<h2>6. length 별 영화 갯수</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>filmLength</th>
+					<th>total</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : filmCountByLength){
+						
+				%>
+					<tr>
+						<td><%=m.get("filmLength") %></td>
+						<td><%=m.get("total") %></td>
+					</tr>
+				<%
+					}
+				%>
+				</tbody>
+			</table>
 
-		<%
-			for(Map m : list_2) {
-		%>
-			<tr>
-				<td><%=m.get("rentalRate")%></td>
-				<td><%=m.get("cnt")%></td>
-			</tr>
-		<%
-			}
-		%>
-	</table>
-	
-	<h1>3. FILM COUNT BY RATING</h1>
-	<table border="1">
-		<thread>
-		<tr>
-			<th>rental_rating</th>
-			<th>ranking</th>
-		</tr>
-		</thread>
-	
-		<%
-			for(Map m : list_3) {
-		%>
-			<tr>
-				<td><%=m.get("rating")%></td>
-				<td><%=m.get("cnt2")%></td>
-			</tr>
-		<%
-			}
-		%>
-	</table>
-	<h1>4. FILM COUNT BY LANGUAGE</h1>
-	<table border="1">
-		<thread>
-		<tr>
-			<th>name</th>
-			<th>COUNT</th>
-		</tr>
-		</thread>
-	
-		<%
-			for(Map m : list_4) {
-		%>
-			<tr>
-				<td><%=m.get("language")%></td>
-				<td><%=m.get("cnt3")%></td>
-			</tr>
-		<%
-			}
-		%>
-	</table>
-	
-	<h1>5. FILM COUNT BY LENHTH</h1>
-	<table border="1">
-		<thread>
-		<tr>
-			<th>LENGTH</th>
-			<th>COUNT</th>
-		</tr>
-		</thread>
-	
-		<%
-			for(Map m : list_5) {
-		%>
-			<tr>
-				<td><%=m.get("lengthTime")%></td>
-				<td><%=m.get("cnt4")%></td>
-			</tr>
-		<%
-			}
-		%>
-	</table>
-	
-	<h1>6. SALES DAYOFWEEK</h1>
-	<table border="1">
-		<thread>
-		<tr>
-			<th>staff_id</th>
-			<th>w</th>
-			<th>DAYOFWEEK</th>
-			<th>c</th>
-		</tr>
-		</thread>
-	
-		<%
-			for(Map m : list_6) {
-		%>
-			<tr>
-				<td><%=m.get("staff_id")%></td>
-				<td><%=m.get("w")%></td>
-				<td><%=m.get("DAYOFWEEK")%></td>
-				<td><%=m.get("c")%></td>
-			</tr>
-		<%
-			}
-		%>
-	</table>
-	
+	<!--actor 별 영화 가장 많이 출현한 배우 5명  -->
+		<h2>7. actor 별 영화 가장 많이 출현한 배우 5명</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>actorName</th>
+					<th>totalFilmCount</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : actorByFilmCount){
+						
+				%>
+					<tr>
+						<td><%=m.get("actorName") %></td>
+						<td><%=m.get("totalFilmCount") %></td>
+					</tr>
+				<%
+					}
+				%>
+				</tbody>
+			</table>
+	<!--영화별 빌려간 횟수와 총 매출  -->
+		<h2>8. 영화별 빌려간 횟수와 총 매출 5개만</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>filmTitle</th>
+					<th>totalFilmCount</th>
+					<th>totalFilmAmount</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : filmByRentalAmount){
+						
+				%>
+					<tr>
+						<td><%=m.get("title") %></td>
+						<td><%=m.get("total") %></td>
+						<td><%=m.get("amount") %></td>
+					</tr>
+				<%
+					}
+				%>
+				</tbody>
+			</table>
+	<!--  -->
+		<h2>9. store 각 매장마다 요일별 1주 매출(월, 화, 수, 목, 금, 토, 일)</h2>
+			<table class="table table-bordered">
+				<thead>
+					<th>store</th>
+					<th>day</th>
+					<th>totalAmountCount</th>
+				</thead>
+				<tbody>
+				<%
+					for(Map m : amountByDayOfWeek){
+						
+				%>
+					<tr>
+						<td><%=m.get("storeId") %></td>
+						<td><%=m.get("DAYOFWEEK") %></td>
+						<td><%=m.get("cnt") %></td>
+					</tr>
+				<%
+					}
+				%>
+				</tbody>
+			</table>
+	</div>	
 </body>
-</html>
+</html> 
