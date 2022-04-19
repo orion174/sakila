@@ -63,14 +63,14 @@
 				for(FilmList f : list) {
 			%>
 				<tr>
-					<td><%=f.getFilmId()%></td>
+					<td><%=f.getFid()%></td>
 					<td><%=f.getTitle()%></td>	
-					<td><%=f.getDescription()%></td>
-					<td><%=f.getName()%></td>
-					<td><%=f.getRentalRate()%></td>
+					<td><%=f.getDesciption()%></td>
+					<td><%=f.getCategory()%></td>
+					<td><%=f.getPrice()%></td>
 					<td><%=f.getLength()%></td>
 					<td><%=f.getRating()%></td>
-					<td><%=f.getActor()%></td>
+					<td><%=f.getActors()%></td>
 			<%
 				}
 			%>
@@ -83,14 +83,14 @@
 		<%
 			if(currentPage > 1) {
 		%>
-				<a href="<%=request.getContextPath()%>/filmList.jsp?currentPage=<%=currentPage-1%>">이전</a>
+				<a href="<%=request.getContextPath()%>/ViewTable/filmList.jsp?currentPage=<%=currentPage-1%>">이전</a>
 		<%		
 			}
 		%>
 		<%
 			if(currentPage < lastPage) {
 		%>
-				<a href="<%=request.getContextPath()%>/filmList.jsp?currentPage=<%=currentPage+1%>">다음</a>
+				<a href="<%=request.getContextPath()%>/ViewTable/filmList.jsp?currentPage=<%=currentPage+1%>">다음</a>
 		<%
 			}
 		%>

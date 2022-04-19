@@ -1,65 +1,84 @@
 package vo;
 
 public class FilmList {
-	private int filmId; // film_id AS FID
+	private int fid;
 	private String title;
-	private String description;
-	private String name; // name AS category
-	private int rentalRate; // rental_rate AS price
-	private int length; // 
-	private String rating; 
-	private String actor; // GROUP_CONCAT(CONCAT(actor.first_name, _utf8mb4' ', actor.last_name) SEPARATOR ', ') 
+	private String desciption;
+	private String category;
+	private double price;
+	private int length;
+	private String rating;
+	private String actors;
+	
 	@Override
 	public String toString() {
-		return "Film [filmId=" + filmId + ", title=" + title + ", description=" + description + ", name=" + name
-				+ ", rentalRate=" + rentalRate + ", length=" + length + ", rating=" + rating + ", actor=" + actor + "]";
+		return "FilmList [fid=" + fid + ", title=" + title + ", desciption=" + desciption + ", category=" + category
+				+ ", price=" + price + ", length=" + length + ", rating=" + rating + ", actors=" + actors + "]";
 	}
-	public int getFilmId() {
-		return filmId;
+	
+	// getter + setter
+	public int getFid() {
+		return fid;
 	}
-	public void setFilmId(int filmId) {
-		this.filmId = filmId;
+
+	public void setFid(int fid) {
+		this.fid = fid;
 	}
+
 	public String getTitle() {
 		return title;
 	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getDescription() {
-		return description;
+
+	public String getDesciption() {
+		return desciption;
 	}
-	public void setDescription(String description) {
-		this.description = description;
+
+	public void setDesciption(String desciption) {
+		this.desciption = desciption;
 	}
-	public String getName() {
-		return name;
+
+	public String getCategory() {
+		return category;
 	}
-	public void setName(String name) {
-		this.name = name;
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
-	public int getRentalRate() {
-		return rentalRate;
+
+	public double getPrice() {
+		return price;
 	}
-	public void setRentalRate(int rentalRate) {
-		this.rentalRate = rentalRate;
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
+
 	public int getLength() {
 		return length;
 	}
+
 	public void setLength(int length) {
 		this.length = length;
 	}
+
 	public String getRating() {
 		return rating;
 	}
+
 	public void setRating(String rating) {
 		this.rating = rating;
 	}
-	public String getActor() {
-		return actor;
+
+	public String getActors() {
+		return actors;
 	}
-	public void setActor(String actor) {
-		this.actor = actor;
+
+	public void setActors(String actors) {
+		this.actors = actors;
 	}
+	
 }
