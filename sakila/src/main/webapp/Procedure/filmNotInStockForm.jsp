@@ -8,7 +8,7 @@
 <body>
 	<a href="<%=request.getContextPath()%>/index.jsp">index</a>
 		
-	<h1>filmNotInStockForm</h1>
+	<h1>film Not In Stock Form</h1>
 		<form class="form-inline" method="post" action="<%=request.getContextPath()%>/Procedure/filmNotInStockAction.jsp">
 			<table border="1">
 				<tr>

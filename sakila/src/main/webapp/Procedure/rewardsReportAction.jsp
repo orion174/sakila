@@ -4,9 +4,9 @@
 <%
 	// rewardsReportsForm
 	// 변수 선언후 초기화
-	int minMonthlyPurchase = 1;
+	int minMonthlyPurchase = 9999;
 	minMonthlyPurchase = Integer.parseInt(request.getParameter("minMonthlyPurchase"));
-	double minDollarAmountPurchase = 1;
+	double minDollarAmountPurchase = 9999;
 	minDollarAmountPurchase = Double.parseDouble(request.getParameter("minDollarAmountPurchase"));
 	
 	// rewardsReportsForm null값 체크 코드 + 디버깅 코드
@@ -25,7 +25,8 @@
 	ArrayList<HashMap<String,Object>> list = (ArrayList<HashMap<String,Object>>)map.get("list"); 
 	
 	// SQL 쿼리에서 받은 count
-	int count = (int)map.get("count"); 
+	int count = 0;
+	count = (Integer)map.get("count"); 
 %>
 <!DOCTYPE html>
 <html>
