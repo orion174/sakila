@@ -35,14 +35,14 @@ public class FilmListDao {
 			// 데이터 변환
 			while(rs.next()) {
 				FilmList f = new FilmList(); // 다형성 
-				f.setFilmId(rs.getInt("filmId"));
+				f.setFid(rs.getInt("fId"));
 				f.setTitle(rs.getString("title"));
-				f.setDescription(rs.getString("description"));
-				f.setName(rs.getString("name"));
-				f.setRentalRate(rs.getInt("rentalRate"));
+				f.setDesciption(rs.getString("desciption"));
+				f.setCategory(rs.getString("category"));
+				f.setPrice(rs.getInt("price"));
 				f.setLength(rs.getInt("length"));
 				f.setRating(rs.getString("rating"));
-				f.setActor(rs.getString("actor"));
+				f.setActors(rs.getString("actors"));
 				list.add(f);
 			}
 
