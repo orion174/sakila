@@ -58,7 +58,7 @@ public class SalesByFilmCategoryDao {
 	/* 데이터의 총 수가 적은 테이블 -> 페이징 처리 구지 안햐두댐 
 	 * 데이터 확장 가능성 염두해서 코드는 짬
 	 */
-	public int selectSalesByFilmCategoryListTotalRow() {
+	public int selectSalesByFilmCategoryTotalRow() {
 		int row = 0;
 		Connection conn = null;
 		PreparedStatement  stmt = null;
@@ -67,17 +67,17 @@ public class SalesByFilmCategoryDao {
 		String sql = "SELECT COUNT(*) cnt FROM sales_by_film_category";
 		try {
 			stmt = conn.prepareStatement(sql);
-			System.out.println("sql selectSalesByFilmCategoryTotalRow : " + stmt);	//디버깅
 			rs = stmt.executeQuery();
 			if(rs.next()) {
 			row = rs.getInt("cnt");
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("예외발생");
 		} finally {
 			try {
-				rs.close(); stmt.close(); conn.close();
+				rs.close();
+				stmt.close(); 
+				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

@@ -22,8 +22,7 @@
 	
 	// 마지막 페이지 변수 값 저장 코드
 	int lastPage = 0;
-	// NBSFDao 클래스 호출
-	int totalCount = dao.selectSalesByFilmCategoryListTotalRow();
+	int totalCount = dao.selectSalesByFilmCategoryTotalRow();
 	// 마지막 페이지는 (전체 데이터 수 / 화면당 보여지는 데이터 수) 가 됨
 	/*
 	lastPage = totalCount / rowPerPage;
