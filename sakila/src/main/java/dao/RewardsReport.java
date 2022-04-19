@@ -65,7 +65,7 @@ import util.DBUtil;
 			}
 			// count의 개수
 			count = stmt.getInt(3); 
-			System.out.println(count+ " <--count");
+			System.out.println(count + " <--count");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
