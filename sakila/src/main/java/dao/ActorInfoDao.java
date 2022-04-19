@@ -58,7 +58,7 @@ public class ActorInfoDao {
 	}
 	
 	public int selectActorInfoTotalRow() throws Exception {
-		int row = 0; // 함수 결과값(쩡수) 반환해줄 변수 선언 후 초기화
+		int row = 0; // 결과값(정수) 반환해줄 변수 선언 후 초기화
 		
 		// DB 초기화
 		Connection conn = null;
