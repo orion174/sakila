@@ -24,7 +24,7 @@ public class FilmListDao {
 		// MariaDB 드라이버 로딩 메서드 호출
 		conn = DBUtil.getConnection();
 		String sql = 
-			"SELECT FID filmId, title title, description description, category name, price rentalRate, length length, rating rating, actors actor FROM film_list ORDER BY FID limit ?,?";
+			"SELECT fid, title, description, category, price, length, rating, actors FROM film_list ORDER BY fid LIMIT ?,?";
 
 		try {
 			// SQL 쿼리 저장, 페이증 처리
@@ -35,11 +35,11 @@ public class FilmListDao {
 			// 데이터 변환
 			while(rs.next()) {
 				FilmList f = new FilmList(); // 다형성 
-				f.setFid(rs.getInt("fId"));
+				f.setFid(rs.getInt("fid"));
 				f.setTitle(rs.getString("title"));
-				f.setDesciption(rs.getString("desciption"));
+				f.setDescription(rs.getString("description"));
 				f.setCategory(rs.getString("category"));
-				f.setPrice(rs.getInt("price"));
+				f.setPrice(rs.getDouble("price"));
 				f.setLength(rs.getInt("length"));
 				f.setRating(rs.getString("rating"));
 				f.setActors(rs.getString("actors"));

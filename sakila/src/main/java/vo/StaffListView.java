@@ -3,13 +3,13 @@ package vo;
 public class StaffListView {
 	private int StaffId; // staff_id AS ID
 	private String name; // CONCAT(s.first_name, _utf8mb4' ', s.last_name)
-	private String address; 
+	private String address;
 	private String postalCode; // postal_code AS `zip code`
-	private String phone; // 
+	private String phone; //
 	private String city;
-	private String country; 
+	private String country;
 	private int storeId; // store_id AS SID
-	
+
 	@Override
 	public String toString() {
 		return "StaffListView [StaffId=" + StaffId + ", name=" + name + ", address=" + address + ", postalCode="
@@ -81,6 +81,5 @@ public class StaffListView {
 	public void setStoreId(int storeId) {
 		this.storeId = storeId;
 	}
-	
-	
+
 }

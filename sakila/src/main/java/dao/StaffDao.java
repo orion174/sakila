@@ -5,17 +5,13 @@ import java.sql.*;
 
 public class StaffDao {
 	
-	/* 2022/04/01 StaffDao
-	 * 04/01 StaffList 출력 구현
-	 * 페이징 코드 처리x
-	*/
 	public List<Map<String,Object>> selectStaffList() {				
-		List<Map<String,Object>> list =new ArrayList<>();
+		List<Map<String,Object>> list = new ArrayList<>();
 		
 		// Maria 드라이버 로딩
 		Connection conn = null;
-		PreparedStatement stmt=null;
-		ResultSet rs =null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		
 		// Maria RDBMS에 접속(IP주소, 접속계정 아이디, 패스워드)
 		try {
@@ -41,12 +37,12 @@ public class StaffDao {
 				+ "		AND s1.address_id = a.address_id;";
 		
 		// staff 쿼리 저장
-		stmt =conn.prepareStatement(sql);
+		stmt = conn.prepareStatement(sql);
 		rs = stmt.executeQuery();
 		
 		// 데이터 변환
 		while(rs.next()) {
-			Map<String,Object> map =new HashMap<>(); // 다형성 
+			Map<String,Object> map = new HashMap<>(); // 다형성 
 			map.put("staffId", rs.getInt("staffId"));
 			map.put("staffName", rs.getString("staffName"));
 			map.put("addressId", rs.getInt("addressId"));

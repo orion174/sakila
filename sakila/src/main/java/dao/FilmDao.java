@@ -433,7 +433,7 @@ public class FilmDao {
 				FilmList f = new FilmList();
 				f.setFid(rs.getInt("fid"));
 				f.setTitle(rs.getString("title"));
-				f.setDesciption(rs.getString("description"));
+				f.setDescription(rs.getString("description"));
 				f.setCategory(rs.getString("category"));
 				f.setPrice(rs.getDouble("price"));
 				f.setLength(rs.getInt("length"));

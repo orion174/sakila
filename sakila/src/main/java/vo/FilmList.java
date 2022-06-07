@@ -3,20 +3,19 @@ package vo;
 public class FilmList {
 	private int fid;
 	private String title;
-	private String desciption;
+	private String description;
 	private String category;
 	private double price;
 	private int length;
 	private String rating;
 	private String actors;
-	
+
 	@Override
 	public String toString() {
-		return "FilmList [fid=" + fid + ", title=" + title + ", desciption=" + desciption + ", category=" + category
+		return "FilmList [fid=" + fid + ", title=" + title + ", description=" + description + ", category=" + category
 				+ ", price=" + price + ", length=" + length + ", rating=" + rating + ", actors=" + actors + "]";
 	}
-	
-	// getter + setter
+
 	public int getFid() {
 		return fid;
 	}
@@ -33,12 +32,12 @@ public class FilmList {
 		this.title = title;
 	}
 
-	public String getDesciption() {
-		return desciption;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setDesciption(String desciption) {
-		this.desciption = desciption;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getCategory() {
@@ -80,5 +79,5 @@ public class FilmList {
 	public void setActors(String actors) {
 		this.actors = actors;
 	}
-	
+
 }
